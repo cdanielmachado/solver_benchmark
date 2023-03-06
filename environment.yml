@@ -1,0 +1,16 @@
+name: benchmark
+
+channels:
+  - conda-forge 
+
+dependencies:
+  - pyscipopt
+  - coin-or-cbc
+  - pyglpk
+  - pip
+  - pip:
+    - reframed
+    - pulp
+    - highspy
+    - cylp
+    - glpk
