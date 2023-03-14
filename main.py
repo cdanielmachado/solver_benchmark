@@ -6,6 +6,9 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16000
 #SBATCH --job-name="solvers"
+#SBATCH --output="logs/out_%j_%a.txt"
+#SBATCH --error="logs/err_%j_%a.txt"
+
 
 from reframed import load_cbmodel, Environment, FBA, pFBA, minimal_medium
 from reframed.solvers.pulp_solver import PuLPSolver
