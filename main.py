@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#SBATCH --array=0-1439
+#SBATCH --array=0-999
 #SBATCH --time=24:00:00
 #SBATCH --nodes=1            
 #SBATCH --cpus-per-task=4
@@ -14,23 +14,36 @@ from reframed import load_cbmodel, Environment, FBA, pFBA, minimal_medium
 from reframed.solvers.pulp_solver import PuLPSolver
 from time import time
 import os
+from reframed import ReactionType
 
-models = ['iIT341', 'iCN718', 'iMM904', 'iAF1260', 'iYS1720', 'iCHOv1', 'Recon3D']
+
+#models = ['iIT341', 'iCN718', 'iMM904', 'iAF1260', 'iYS1720', 'iCHOv1', 'Recon3D']
+models = ['iIT341', 'iLJ478', 'iAF692', 'iCN718', 'iMM904', 'iAF1260', 'iJO1366', 'iYS1720', 'iCHOv1', 'Recon3D']
+
 #interfaces = ['CPLEX_PY', 'GUROBI', 'GLPK_CMD', 'COIN_CMD', 'SCIP_CMD', 'HiGHS_CMD']
 interfaces = ['CPLEX_PY', 'GLPK_CMD', 'COIN_CMD', 'SCIP_CMD', 'HiGHS_CMD']
-tests = ['LP1', 'LP2', 'MILP1', 'MILP2']
+
+tests = ['LP1', 'MILP1']
 
 job_index = int(os.environ['SLURM_ARRAY_TASK_ID'])
-model_id = models[job_index % 7]
-interface = interfaces[job_index // 7 % 5]
-test = tests[job_index // 35 % 4]
-replicate = job_index // 140
+model_id = models[job_index % 10]
+interface = interfaces[job_index // 10 % 5]
+test = tests[job_index // 50 % 2]
+replicate = job_index // 100
 
 print(f'running: {interface}\t{model_id}\t{test}\t{replicate}')
 
 model = load_cbmodel(f'models/{model_id}.xml.gz')
 Environment.complete(model, inplace=True, max_uptake=1)
 model.reactions[model.biomass_reaction].ub = 1000
+
+if model_id == 'Recon3D':
+    for r_id in model.get_reactions_by_type(ReactionType.SINK):
+        model.reactions[r_id].lb = 0
+
+if model_id == 'iCN718':
+    model.remove_reaction('R_DNADRAIN')
+
 solver = PuLPSolver(model, interface)
 
 start = time()
