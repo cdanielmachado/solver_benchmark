@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#SBATCH --array=0-999
+#SBATCH --array=0-699
 #SBATCH --time=24:00:00
 #SBATCH --nodes=1            
 #SBATCH --cpus-per-task=4
@@ -10,26 +10,23 @@
 #SBATCH --error="logs/err_%j_%a.txt"
 
 
-from reframed import load_cbmodel, Environment, FBA, pFBA, minimal_medium
+from reframed import load_cbmodel, Environment, FBA, minimal_medium
 from reframed.solvers.pulp_solver import PuLPSolver
 from time import time
 import os
 from reframed import ReactionType
 
 
-#models = ['iIT341', 'iCN718', 'iMM904', 'iAF1260', 'iYS1720', 'iCHOv1', 'Recon3D']
-models = ['iIT341', 'iLJ478', 'iAF692', 'iCN718', 'iMM904', 'iAF1260', 'iJO1366', 'iYS1720', 'iCHOv1', 'Recon3D']
-
+models = ['iLJ478', 'iCN718', 'iMM904', 'iAF1260', 'iYS1720', 'iCHOv1', 'Recon3D']
 #interfaces = ['CPLEX_PY', 'GUROBI', 'GLPK_CMD', 'COIN_CMD', 'SCIP_CMD', 'HiGHS_CMD']
 interfaces = ['CPLEX_PY', 'GLPK_CMD', 'COIN_CMD', 'SCIP_CMD', 'HiGHS_CMD']
-
-tests = ['LP1', 'MILP1']
+tests = ['LP', 'MILP']
 
 job_index = int(os.environ['SLURM_ARRAY_TASK_ID'])
-model_id = models[job_index % 10]
-interface = interfaces[job_index // 10 % 5]
-test = tests[job_index // 50 % 2]
-replicate = job_index // 100
+model_id = models[job_index % 7]
+interface = interfaces[job_index // 7 % 5]
+test = tests[job_index // 35 % 2]
+replicate = job_index // 70
 
 print(f'running: {interface}\t{model_id}\t{test}\t{replicate}')
 
@@ -48,23 +45,16 @@ solver = PuLPSolver(model, interface)
 
 start = time()
 
-if test == 'LP1':
+if test == 'LP':
     sol = FBA(model, solver=solver, get_values=False)
     fobj = sol.fobj
-
-if test == 'LP2':
-    sol = pFBA(model, solver=solver, cleanup=False)
-    fobj = sol.fobj       
+     
     
-if test == 'MILP1':
+if test == 'MILP':
     sol = minimal_medium(model, solver=solver, max_uptake=1, min_growth=0.01, 
                             validate=False, warnings=False, min_mass_weight=False)
     fobj = sol[1].fobj
     
-if test == 'MILP2':
-    sol = minimal_medium(model, solver=solver, max_uptake=1, min_growth=0.01, 
-                            validate=False, warnings=False, min_mass_weight=True)
-    fobj = sol[1].fobj
     
 elapsed = time() - start
 
