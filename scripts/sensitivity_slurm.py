@@ -17,7 +17,7 @@ from random import sample
 import os
 
 interfaces = ['GLPK_CMD', 'COIN_CMD']
-K = 10#312
+K = 312
 
 job_index = int(os.environ['SLURM_ARRAY_TASK_ID'])
 interface = interfaces[job_index % 2]

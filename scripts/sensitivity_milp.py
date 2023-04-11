@@ -37,7 +37,6 @@ for i in range(N_reps):
         elapsed = time() - start
 
         if cpds is not None:
-#            cpds = ', '.join([x[5:-2] for x in sorted(cpds)])
             data.append((interface, i, sol.fobj, elapsed))
 
 df = pd.DataFrame(data, columns=['interface',  'replicate', 'value', 'time'])
