@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from reframed import Community, ModelCache, FBA, Environment
+from reframed import Community, ModelCache, FBA, pFBA, Environment
 from random import sample
 from glob import glob
 from time import time
@@ -14,9 +14,10 @@ paths = glob('../../embl_gems/models/*/*/*.xml.gz')
 ids = ['_'.join(x.split('/')[-1].split('_')[:2]) for x in paths]
 cache = ModelCache(ids, paths, load_args={"flavor": "bigg"})
 
-interfaces = ['CPLEX_PY']#, 'GUROBI', 'SCIP_CMD', 'HiGHS_CMD', 'GLPK_CMD', 'COIN_CMD' ]
-sizes = range(1,11)
-reps = 1
+interfaces = ['CPLEX_PY', 'GUROBI', 'SCIP_CMD', 'HiGHS_CMD', 'GLPK_CMD', 'COIN_CMD' ]
+sizes = range(1,21)
+tests = ['LP', 'LP2']
+reps = 10
 
 data = []
 
@@ -29,17 +30,25 @@ for size in sizes:
         model = comm.merged_model
         Environment.complete(model, inplace=True)
         
-        for interface in interfaces:
-            print(size, rep, interface)
+        for test in tests:
+            for interface in interfaces:
 
-            solver = PuLPSolver(model, interface, mip=False)
+                print(size, interface, test, rep, sep='\t')
 
-            start = time()
-            sol = FBA(model, solver=solver, get_values=False)
-            elapsed = time() - start
-    
-            data.append((interface, size, rep, elapsed, sol.fobj))
+                solver = PuLPSolver(model, interface, mip=False)
 
-df = pd.DataFrame(data, columns=['interface', 'size', 'rep', 'time', 'value'])
+                start = time()
 
-df.to_csv('../results/community_simulation_2.tsv', sep='\t', index=False)
+                if test == 'LP':
+                    sol = FBA(model, solver=solver, get_values=False)
+
+                if test == 'LP2':
+                    sol = pFBA(model, solver=solver, cleanup=False)
+
+                elapsed = time() - start
+        
+                data.append((interface, size, test, rep, elapsed, sol.fobj))
+
+df = pd.DataFrame(data, columns=['interface', 'test', 'size', 'rep', 'time', 'value'])
+
+df.to_csv('../results/community_simulation.tsv', sep='\t', index=False)

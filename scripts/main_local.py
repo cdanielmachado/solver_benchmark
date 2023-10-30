@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
-from reframed import load_cbmodel, Environment, FBA, minimal_medium
+from reframed import load_cbmodel, Environment, FBA, minimal_medium, pFBA
 from reframed.solvers.pulp_solver import PuLPSolver
 from time import time
 from reframed import ReactionType
 import pandas as pd
 
 
-models = ['iLJ478', 'iCN718', 'iMM904']#, 'iAF1260', 'iYS1720', 'iCHOv1', 'Recon3D']
+models = ['iLJ478', 'iCN718', 'iMM904', 'iAF1260', 'iYS1720', 'iCHOv1', 'Recon3D']
 interfaces = ['CPLEX_PY', 'GUROBI', 'SCIP_CMD', 'HiGHS_CMD', 'GLPK_CMD', 'COIN_CMD' ]
 tests = ['LP', 'LP2', 'MILP']
-N_reps = 1
+N_reps = 10
 
 data = []
 
@@ -31,6 +31,8 @@ for model_id in models:
         for i in range(N_reps):
             for interface in interfaces:
 
+                print(interface, model_id, i, test, sep='\t')
+
                 if test == 'MILP' and model_id == 'Recon3D' and interface in ['GLPK_CMD', 'COIN_CMD']:
                     continue
 
@@ -42,7 +44,7 @@ for model_id in models:
                     sol = FBA(model, solver=solver, get_values=False)
                 
                 if test == 'LP2':
-                    sol = pFBA(model, solver=solver, clean_up=False)
+                    sol = pFBA(model, solver=solver, cleanup=False)
 
                 if test == 'MILP':
                     mm, sol = minimal_medium(model, solver=solver, max_uptake=1, min_growth=0.01, 
