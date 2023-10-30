@@ -29,7 +29,7 @@ replicate = job_index // 70
 
 print(f'running: {interface}\t{model_id}\t{test}\t{replicate}')
 
-model = load_cbmodel(f'models/{model_id}.xml.gz')
+model = load_cbmodel(f'../models/{model_id}.xml.gz')
 Environment.complete(model, inplace=True, max_uptake=1)
 model.reactions[model.biomass_reaction].ub = 1000
 
