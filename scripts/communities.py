@@ -35,7 +35,7 @@ for size in sizes:
 
                 print(size, interface, test, rep, sep='\t')
 
-                solver = PuLPSolver(model, interface, mip=False)
+                solver = PuLPSolver(model, interface, mip=False, timeLimit=3600)
 
                 start = time()
 
@@ -49,6 +49,6 @@ for size in sizes:
         
                 data.append((interface, size, test, rep, elapsed, sol.fobj))
 
-df = pd.DataFrame(data, columns=['interface', 'test', 'size', 'rep', 'time', 'value'])
+df = pd.DataFrame(data, columns=['interface', 'size', 'test', 'rep', 'time', 'value'])
 
 df.to_csv('../results/community_simulation.tsv', sep='\t', index=False)

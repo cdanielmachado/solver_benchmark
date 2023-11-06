@@ -19,7 +19,6 @@ lpmethods = ['primal', 'dual', 'barrier']
 sizes = range(1,21)
 reps = 10
 
-
 data = []
 
 for size in sizes:
@@ -40,7 +39,7 @@ for size in sizes:
 
                 print(size, interface, rep, lpmethod, sep='\t')
 
-                solver = PuLPSolver(model, interface, lpmethod=lpmethod, mip=False)
+                solver = PuLPSolver(model, interface, lpmethod=lpmethod, mip=False, timeLimit=3600)
 
                 start = time()
                 sol = FBA(model, solver=solver, get_values=False)
@@ -49,6 +48,5 @@ for size in sizes:
                 data.append((interface, lpmethod, size, rep, elapsed, sol.fobj))
 
 df = pd.DataFrame(data, columns=['interface', 'lpmethod', 'size', 'rep', 'time', 'value'])
-
 
 df.to_csv('../results/lp_methods.tsv', sep='\t', index=False)
