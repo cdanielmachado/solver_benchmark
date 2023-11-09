@@ -14,10 +14,10 @@ paths = glob('../../embl_gems/models/*/*/*.xml.gz')
 ids = ['_'.join(x.split('/')[-1].split('_')[:2]) for x in paths]
 cache = ModelCache(ids, paths, load_args={"flavor": "bigg"})
 
-interfaces = ['CPLEX_PY', 'GUROBI', 'SCIP_CMD', 'HiGHS_CMD', 'GLPK_CMD', 'COIN_CMD' ]
-lpmethods = ['primal', 'dual', 'barrier']
+interfaces = ['CPLEX_PY', 'GUROBI', 'SCIP_CMD', 'HiGHS_CMD', 'GLPK_CMD', 'COIN_CMD']
+lpmethods = ['default', 'primal', 'dual', 'barrier']
 sizes = range(1,21)
-reps = 10
+reps = 1
 
 data = []
 
@@ -39,7 +39,10 @@ for size in sizes:
 
                 print(size, interface, rep, lpmethod, sep='\t')
 
-                solver = PuLPSolver(model, interface, lpmethod=lpmethod, mip=False, timeLimit=3600)
+                if lpmethod == 'default':
+                    solver = PuLPSolver(model, interface, mip=False, timeLimit=3600)
+                else:
+                    solver = PuLPSolver(model, interface, lpmethod=lpmethod, mip=False, timeLimit=3600)
 
                 start = time()
                 sol = FBA(model, solver=solver, get_values=False)
